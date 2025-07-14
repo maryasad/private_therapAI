@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MindMate - Your Mental Health Companion</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+  <script src="renderer.js" type="module"></script>
+  <style>
+    :root {
+      --primary: #5e72e4;
+      --secondary: #2dce89;
+      --light: #f8f9fe;
+      --dark: #32325d;
+      --gray: #8898aa;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Arial, sans-serif; 
+      max-width: 1000px; 
+      margin: 0 auto; 
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: var(--dark);
+    }
+    
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .tab-btn {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray);
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    }
+    
+    textarea { 
+      width: 100%; 
+      margin: 10px 0; 
+      padding: 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 16px;
+      min-height: 150px;
+      resize: vertical;
+    }
+    
+    button {
+      padding: 12px 24px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    
+    button.secondary {
+      background: var(--secondary);
+    }
+    
+    #sentiment { 
+      margin: 15px 0; 
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      background: #f8f9fe;
+    }
+    
+    .breathing-container {
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .breathing-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: var(--primary);
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      transition: all 1.5s ease-in-out;
+    }
+    
+    .prompt-card {
+      cursor: pointer;
+      margin: 10px 0;
+      padding: 15px;
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+    }
+    
+    .prompt-card:hover {
+      background: #f8f9fe;
+      transform: translateX(5px);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    /* Sentiment Classes */
+    .positive {
+      color: #2dce89;
+      background-color: rgba(45, 206, 137, 0.1) !important;
+      border-left: 4px solid #2dce89;
+    }
+    
+    .negative {
+      color: #f5365c;
+      background-color: rgba(245, 54, 92, 0.1) !important;
+      border-left: 4px solid #f5365c;
+    }
+    
+    .neutral {
+      color: #5e72e4;
+      background-color: rgba(94, 114, 228, 0.1) !important;
+      border-left: 4px solid #5e72e4;
+    }
+    
+    /* Journal Entries */
+    .journal-entry {
+      margin: 15px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .journal-entry p {
+      margin: 5px 0;
+    }
+    
+    .journal-entry hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 10px 0 0 0;
+    }
+    
+    /* Breathing Animation */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .breathing-circle {
+      transition: all 1.5s ease-in-out;
+      animation: pulse 2s infinite;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .card {
+        padding: 15px;
+      }
+      
+      .breathing-circle {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="journal">Journal</button>
+    <button class="tab-btn" data-tab="therapy">Therapy Tools</button>
+  </div>
+  
+  <!-- Journal Tab -->
+  <div id="journal-tab" class="tab-content active">
+    <div class="card">
+      <h2>How are you feeling today?</h2>
+      <textarea id="journal" placeholder="Write about your thoughts, feelings, or anything on your mind..."></textarea>
+      <button id="analyzeBtn">Analyze Sentiment</button>
+      <p id="sentiment"></p>
+    </div>
+    
+    <div class="card">
+      <h3>Mood Tracker</h3>
+      <div style="width: 100%; max-width: 800px;">
+        <canvas id="moodChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Therapy Tools Tab -->
+  <div id="therapy-tab" class="tab-content">
+    <!-- Guided Journaling -->
+    <div class="card">
+      <h2>Guided Journaling</h2>
+      <p>Need inspiration? Try one of these prompts:</p>
+      
+      <div id="prompts-container">
+        <div class="prompt-card" onclick="usePrompt('What are three things you\'re grateful for today?')">
+          <h3>Gratitude</h3>
+          <p>What are three things you're grateful for today?</p>
+        </div>
+        
+        <div class="prompt-card" onclick="usePrompt('Describe a challenge you faced today and how you handled it.')">
+          <h3>Overcoming Challenges</h3>
+          <p>Describe a challenge you faced today and how you handled it.</p>
+        </div>
+        
+        <div class="prompt-card" onclick="usePrompt('What would make today great?')">
+          <h3>Daily Intentions</h3>
+          <p>What would make today great?</p>
+        </div>
+        
+        <div class="prompt-card" onclick="usePrompt('What\'s something kind you did for yourself or others today?')">
+          <h3>Acts of Kindness</h3>
+          <p>What's something kind you did for yourself or others today?</p>
+        </div>
+      </div>
+      
+      <div id="custom-prompt-container" class="hidden">
+        <h3>Your Journal</h3>
+        <textarea id="journal-therapy" placeholder="Write your response here..."></textarea>
+        <button onclick="saveTherapyEntry()" class="secondary">Save Entry</button>
+        <button onclick="backToPrompts()">← Back to Prompts</button>
+      </div>
+    </div>
+    
+    <!-- Breathing Exercise -->
+    <div class="card">
+      <h2>Breathing Exercise</h2>
+      <p>Take a moment to breathe and center yourself.</p>
+      
+      <div class="breathing-container">
+        <div class="breathing-circle" id="breathing-circle">Breathe In</div>
+        <p id="breathing-instruction">Click Start to begin the breathing exercise</p>
+        <button id="start-breathing">Start Breathing</button>
+        <button id="stop-breathing" class="hidden" style="background: #f5365c;">Stop</button>
+      </div>
+      
+      <div id="breathing-timer" class="hidden">
+        <p>Time remaining: <span id="time-remaining">2:00</span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
