@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "build": "webpack --config webpack.config.js",
-    "prepare": "husky install"
+
   },
   "keywords": [],
   "author": "",
